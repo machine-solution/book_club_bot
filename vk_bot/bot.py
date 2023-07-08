@@ -6,12 +6,11 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 load_dotenv()
 TOKEN = os.environ["VK_TOKEN"]
 
-api = vk_api.VkApi(token = TOKEN)
-give = api.get_api()
-longpoll = VkLongPoll(api)
+vk_session = vk_api.VkApi(token = TOKEN)
+longpoll = VkLongPoll(vk_session)
 
 def send_message(id, text):
-    api.method('messages.send', {'user_id' : id, 'message' : text, 'random_id': 0})
+    vk_session.method('messages.send', {'user_id' : id, 'message' : text, 'random_id': 0})
 
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW:
