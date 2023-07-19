@@ -1,2 +1,2 @@
 source venv/bin/activate
-python vk_bot/bot.py
+nohup python vk_bot/bot.py
