@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 cd ~/book_club/book_club_bot/
 git pull
