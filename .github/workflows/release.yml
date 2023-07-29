@@ -2,12 +2,6 @@ name: Release workflow
 
 on:
   workflow_dispatch:
-    inputs:
-      name:
-        description: 'Person to greet'
-        default: 'World'
-        required: true
-        type: string
 
 
 jobs:
@@ -15,5 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Send greeting
-      run: echo "Hello ${{ inputs.name }}"
+    - name: SSH Command
+      uses: D3rHase/ssh-command-action@v0.2.2
+      with:
+        host: ${{secrets.HOST}}
+        user: ${{secrets.USER}}
+        private_key: ${{secrets.PRIVATE_KEY}}
+        command: echo "$(date +%F::%T) Run release" >> ~/logs/shell.log
