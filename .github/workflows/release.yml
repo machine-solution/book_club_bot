@@ -5,7 +5,7 @@ on:
 
 
 jobs:
-  greet:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
