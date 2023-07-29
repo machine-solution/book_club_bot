@@ -12,8 +12,7 @@ jobs:
     - name: SSH Command
       uses: D3rHase/ssh-command-action@v0.2.2
       with:
-        host: ${{secrets.HOST}}
+        host: ${{secrets.IP_VM_1}}
         user: ${{secrets.USER}}
-        private_key: ${{secrets.PRIVATE_KEY}}
-        host_fingerprint: ${{secrets.HOST_FINGERPRINT}}
+        private_key: ${{secrets.PRIVATE_KEY_VM_1}}
         command: echo "$(date +%F::%T) Run release" >> ~/logs/shell.log
