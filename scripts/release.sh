@@ -15,4 +15,4 @@ fi
 
 cd --
 
-return $code
+exit $code
