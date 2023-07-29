@@ -2,8 +2,10 @@
 
 cd ~/book_club/book_club_bot/
 
+echo "$(date +%F::%T) Start release" >> ~/logs/shell.log
+
 scripts/update.sh &&
-sudo systemctl restart script
+sudo systemctl restart script >> ~/logs/shell.log
 
 code=$?
 
