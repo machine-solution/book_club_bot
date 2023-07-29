@@ -5,14 +5,14 @@ on:
 
 
 jobs:
-  greet:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: SSH Command
       uses: D3rHase/ssh-command-action@v0.2.2
       with:
-        host: ${{secrets.HOST}}
+        host: ${{secrets.IP_VM_1}}
         user: ${{secrets.USER}}
-        private_key: ${{secrets.PRIVATE_KEY}}
-        command: echo "$(date +%F::%T) Run release" >> ~/logs/shell.log
+        private_key: ${{secrets.PRIVATE_KEY_VM_1}}
+        command: ~/book_club/book_club_bot/scripts/release.sh
