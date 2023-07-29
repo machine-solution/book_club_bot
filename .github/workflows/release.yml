@@ -15,4 +15,5 @@ jobs:
         host: ${{secrets.IP_VM_1}}
         user: ${{secrets.USER}}
         private_key: ${{secrets.PRIVATE_KEY_VM_1}}
-        command: echo "$(date +%F::%T) Run release" >> ~/logs/shell.log
+        host_fingerprint: ${{secrets.PUBLIC_KEY_VM_1}}
+        command: ~/book_club/book_club_bot/scripts/release.sh
