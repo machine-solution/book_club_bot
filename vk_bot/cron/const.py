@@ -3,8 +3,9 @@ NOTIFY_SOON = """
 """
 
 NOTIFY_NOW = """
-Саша @alwaysfeelsun, завтра будет сделать еженедельный пост в группе!
+Саша @alwaysfeelsun, сегодня нужно сделать еженедельный пост в группе!
 """
 
+CLUB_CHAT_ID = 1
 TEST_CHAT_ID = 2
 ADMIN_CHAT_ID = 3
