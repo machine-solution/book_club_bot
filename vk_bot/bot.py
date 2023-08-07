@@ -1,19 +1,14 @@
-from dotenv import load_dotenv
-import os
-import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 
-import vk_bot.const as const
+from vk_bot import const
+from vk_bot import vk
 
-load_dotenv()
-TOKEN = os.environ["VK_TOKEN"]
-
-vk_session = vk_api.VkApi(token = TOKEN)
-longpoll = VkLongPoll(vk_session)
+session = vk.get_session()
+longpoll = VkLongPoll(session)
 
 
 def send_message(id, text):
-    vk_session.method('messages.send', {'user_id' : id, 'message' : text, 'random_id': 0})
+    session.method('messages.send', {'user_id' : id, 'message' : text, 'random_id': 0})
 
 
 for event in longpoll.listen():

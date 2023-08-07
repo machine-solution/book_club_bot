@@ -1,20 +1,11 @@
-from dotenv import load_dotenv
-import os
-import vk_api
-from vk_api.utils import get_random_id
+from vk_bot import const
+from vk_bot import vk
 
-import vk_bot.const as const
 
-load_dotenv()
-TOKEN = os.environ["VK_TOKEN"]
+vk_session = vk.get_session()
 
-vk_session = vk_api.VkApi(token = TOKEN)
-vk = vk_session.get_api()
-
-#===================================
-
-vk.messages.send(
-    random_id=get_random_id(),
+vk_session.method(
+    'messages.send',
     message=const.NOTIFY_SOON,
     chat_id=const.ADMIN_CHAT_ID,
 )
