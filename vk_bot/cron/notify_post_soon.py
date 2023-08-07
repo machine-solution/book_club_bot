@@ -3,7 +3,7 @@ import os
 import vk_api
 from vk_api.utils import get_random_id
 
-import const
+import vk_bot.const as const
 
 load_dotenv()
 TOKEN = os.environ["VK_TOKEN"]
