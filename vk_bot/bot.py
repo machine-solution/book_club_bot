@@ -3,6 +3,7 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_bot import const
 from vk_bot import vk
 
+
 session = vk.get_session()
 longpoll = VkLongPoll(session)
 
