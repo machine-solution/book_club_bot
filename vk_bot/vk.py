@@ -8,3 +8,7 @@ TOKEN = os.environ["VK_TOKEN"]
 
 def get_session():
     return vk_api.VkApi(token = TOKEN)
+
+
+def get_api():
+    return get_session().get_api()
