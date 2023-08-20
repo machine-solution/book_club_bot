@@ -15,6 +15,6 @@ else
     echo "$(date +%F::%T) Fail release" >> /home/machine_solution/logs/shell.log
 fi
 
-cd --
+cd -
 
 exit $code
