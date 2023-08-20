@@ -1,6 +1,6 @@
 #! /bin/bash
 
-cd ~/book_club/book_club_bot/
+cd /home/machine_solution/book_club/book_club_bot/
 
 git fetch --all
 git reset --hard origin/main
