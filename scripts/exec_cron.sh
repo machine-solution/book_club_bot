@@ -1,4 +1,4 @@
-# bin/bash
+#!bin/bash
 
 cd /home/machine_solution/book_club/book_club_bot
 
@@ -24,4 +24,4 @@ source venv/bin/activate
 python "$1" >> /home/machine_solution/logs/shell.log
 deactivate
 
-cd --
+cd -

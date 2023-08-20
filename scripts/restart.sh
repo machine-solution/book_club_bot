@@ -6,4 +6,4 @@ kill.sh
 update.sh
 run.sh
 
-cd--
+cd -
