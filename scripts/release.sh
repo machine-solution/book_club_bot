@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 cd /home/machine_solution/book_club/book_club_bot/
 
