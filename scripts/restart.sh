@@ -1,9 +1,9 @@
 #!/bin/bash
 
-cd /home/machine_solution/book_club/book_club_bot/scripts
+cd /home/machine_solution/book_club/book_club_bot
 
-kill.sh
-update.sh
-run.sh
+scripts/kill.sh
+scripts/update.sh
+scripts/run.sh
 
 cd -
