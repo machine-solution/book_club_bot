@@ -4,7 +4,8 @@ import vk_api
 from vk_api import utils as vk_utils
 
 import typing as tp
-import psycopg2
+from common import sql
+from common import sql_scripts
 
 load_dotenv()
 TOKEN = os.environ["VK_TOKEN"]
@@ -46,6 +47,18 @@ def get_vk_tag(session, vk_id) -> tp.Optional[str]:
     return user_data['screen_name']
 
 
+def get_user_by_vk_id(session, vk_id) -> tp.Optional[tp.Dict]:
+    result = sql.fetch_one(
+        query=sql_scripts.GET_USER_BY_VK,
+        args={
+            "vk_id": vk_id,
+        }
+    )
+    if result is None:
+        return None
+    return result
+
+
 def register_user(session, vk_id) -> tp.Optional[int]:
     vk_tag = get_vk_tag(
         session=session,
@@ -53,5 +66,13 @@ def register_user(session, vk_id) -> tp.Optional[int]:
     )
     if vk_tag is None:
         return None
-    print(vk_id, vk_tag)
-    return 0
+    result = sql.fetch_one(
+        query=sql_scripts.CONNECT_VK_USER,
+        args={
+            "vk_id": vk_id,
+            "vk_tag": vk_tag,
+        }
+    )
+    if result is None:
+        return None
+    return result['user_id']

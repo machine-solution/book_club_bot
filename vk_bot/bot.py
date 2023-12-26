@@ -17,14 +17,14 @@ for event in longpoll.listen():
                 session=session,
                 vk_id=vk_id,
             )
-            user_id = vk.register_user(
+            user = vk.get_user_by_vk_id(
                 session=session,
                 vk_id=vk_id,
             )
-            print(user_id)
+            name = "@" + user["vk_tag"] if user else "Незнакомец"
 
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=const.DEFAULT_REPLY,
+                text=const.REPLY_WITH_NAME % name,
             )
