@@ -4,6 +4,7 @@ import vk_api
 from vk_api import utils as vk_utils
 
 import typing as tp
+import psycopg2
 
 load_dotenv()
 TOKEN = os.environ["VK_TOKEN"]
