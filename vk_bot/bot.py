@@ -368,6 +368,12 @@ def _writing_feedback_process_vk(session, event: EventType, user_state: tp.Dict,
     # message from user
     # TODO
     if event.type == VkBotEventType.MESSAGE_NEW:
+        feedback = event.obj.message["text"]
+        vk.create_feedback(
+            session=session,
+            user_id=user_id,
+            feedback=feedback,
+        )
         vk.update_user_state(
             session=session,
             user_id=user_id,

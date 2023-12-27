@@ -140,3 +140,16 @@ def register_user(session, vk_id) -> tp.Optional[int]:
     if result is None:
         return None
     return result["user_id"]
+
+
+def create_feedback(session, user_id, feedback):
+    result = sql.fetch_one(
+        query=sql_scripts.CREATE_FEEDBACK,
+        args={
+            "user_id": user_id,
+            "content": feedback,
+        }
+    )
+    if result is None:
+        return None
+    return result["feedback_id"]

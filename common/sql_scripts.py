@@ -35,3 +35,15 @@ UPDATE_USER_STATE = """
     WHERE user_id = %(user_id)s
     RETURNING user_id
 """
+
+
+CREATE_FEEDBACK = """
+    WITH created_feedback AS (
+        INSERT INTO book_club.feedbacks (content, created_at)
+        VALUES (%(content)s, NOW())
+        RETURNING id
+    )
+    INSERT INTO book_club.users_feedbacks (user_id, feedback_id)
+    SELECT %(user_id)s, id FROM created_feedback
+    RETURNING feedback_id
+"""
