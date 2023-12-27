@@ -42,7 +42,7 @@ for event in bot_longpoll.listen():
                             }),
                             "label": "Вступить в клуб",
                         },
-                        "color": "secondary",
+                        "color": "primary",
                     },
                 ],
             ]
