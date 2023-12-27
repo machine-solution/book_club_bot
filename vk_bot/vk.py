@@ -153,3 +153,71 @@ def create_feedback(session, user_id, feedback):
     if result is None:
         return None
     return result["feedback_id"]
+
+
+def get_feedbacks_for_user(session, user_id, start_num: int, count: int):
+    if start_num < 0:
+        return []
+    result = sql.fetch_all(
+        query=sql_scripts.GET_FEEDBACKS_FOR_USER,
+        args={
+            "user_id": user_id,
+            "start_num": start_num,
+            "count": count,
+        }
+    )
+    return result
+
+
+def get_feedback_for_user(session, user_id, num: int):
+    feedbacks = get_feedbacks_for_user(
+        session=session,
+        user_id=user_id,
+        start_num=num,
+        count=1,
+    )
+    if not feedbacks:
+        return None
+    return feedbacks[0]
+
+
+def get_feedbacks_count(session, user_id):
+    result = sql.fetch_one(
+        query=sql_scripts.GET_FEEDBACKS_COUNT_FOR_USER,
+        args={
+            "user_id": user_id,
+        }
+    )
+    return result["cnt"]
+
+
+def get_feedbacks_pages_count(session, user_id):
+    fb_cnt = get_feedbacks_count(session=session, user_id=user_id)
+    return (fb_cnt - 1) // const.FEEDBACKS_PAGE_SIZE + 1
+
+
+def _prepare_feedback(num: int, start_num: int, content: str) -> str:
+    prefix = str(num + start_num + 1) + ". "
+    suffix = "\n"
+    if len(content) + len(prefix) + len(suffix) < const.FEEDBACK_PREVIEW_LINE_SIZE:
+        return prefix + content + suffix
+    suffix = "...\n"
+    content_len = const.FEEDBACK_PREVIEW_LINE_SIZE - len(suffix) - len(prefix)
+    return prefix + content[:content_len] + suffix
+
+
+def get_preview_feedbacks(session, user_id, page_num):
+    feedbacks = get_feedbacks_for_user(
+        session=session,
+        user_id=user_id,
+        start_num=page_num * const.FEEDBACKS_PAGE_SIZE,
+        count=const.FEEDBACKS_PAGE_SIZE,
+    )
+    answer = ""
+    for num, feedback in enumerate(feedbacks):
+        answer += _prepare_feedback(
+            num=num,
+            start_num=page_num * const.FEEDBACKS_PAGE_SIZE,
+            content=feedback["content"],
+        )
+    return answer

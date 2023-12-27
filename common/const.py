@@ -31,6 +31,10 @@ BUTTON_COLOR_POSITIVE = "positive"
 BUTTON_COLOR_NEGATIVE = "negative"
 
 #================================================
+FEEDBACKS_PAGE_SIZE = 1
+FEEDBACK_PREVIEW_LINE_SIZE = 45
+
+#================================================
 CLUB_CHAT_ID = 1
 TEST_CHAT_ID = 2
 ADMIN_CHAT_ID = 3

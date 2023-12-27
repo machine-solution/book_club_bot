@@ -337,8 +337,35 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
                 text=tt.WRITE_YOUR_FEEDBACK,
                 keyboard=get_keyboard(const.USER_STATE_WRITING_FEEDBACK),
             )
-        # TODO
         if payload.get("action", "") == const.USER_ACTION_VIEW_FEEDBACKS:
+            message = vk.get_preview_feedbacks(
+                session=session,
+                user_id=user_id,
+                page_num=0,
+            )
+            if not message:
+                vk.update_user_state(
+                    session=session,
+                    user_id=user_id,
+                    new_state={
+                        "state": const.USER_STATE_MENU,
+                        "params": {},
+                    }
+                )
+                vk.answer_event(
+                    session=session,
+                    vk_id=vk_id,
+                    peer_id=event.obj.peer_id,
+                    event_id=event.obj.event_id,
+                )
+                vk.send_message(
+                    session=session,
+                    vk_id=vk_id,
+                    text=tt.NAS_NO_FEEDBACKS,
+                    keyboard=get_keyboard(const.USER_STATE_MENU),
+                )
+                return
+
             vk.update_user_state(
                 session=session,
                 user_id=user_id,
@@ -358,7 +385,7 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=tt.NAS_NO_FEEDBACKS,
+                text=message,
                 keyboard=get_keyboard(const.USER_STATE_PREVIEW_PAGE),
             )
 
@@ -366,7 +393,6 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
 # USER_STATE_WRITING_FEEDBACK
 def _writing_feedback_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
     # message from user
-    # TODO
     if event.type == VkBotEventType.MESSAGE_NEW:
         feedback = event.obj.message["text"]
         vk.create_feedback(
@@ -416,23 +442,54 @@ def _writing_feedback_process_vk(session, event: EventType, user_state: tp.Dict,
             )
 
 
+def _convert_to_int(s) -> tp.Optional[int]:
+    try:
+        # user 1 is computer 0 number
+        return int(s) - 1
+    except:
+        return None
+
+
 # USER_STATE_PREVIEW_PAGE
 def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
     # message from user
     # TODO
     if event.type == VkBotEventType.MESSAGE_NEW:
+        number = event.obj.message["text"]
+        num = _convert_to_int(s=number)
+
+        feedback = None
+        if num is not None:
+            feedback = vk.get_feedback_for_user(
+                session=session,
+                user_id=user_id,
+                num=num,
+            )
+        
+        if feedback is None:
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.INCORRECT_FB_NUMBER,
+                keyboard=get_keyboard(const.USER_STATE_PREVIEW_PAGE),
+            )
+            return
+        
+
         vk.update_user_state(
             session=session,
             user_id=user_id,
             new_state={
                 "state": const.USER_STATE_FEEDBACK_SELECTED,
-                "params": {},
+                "params": {
+                    "feedback_id": feedback["id"],
+                },
             }
         )
         vk.send_message(
             session=session,
             vk_id=vk_id,
-            text=tt.DEFAULT_MESSAGE,
+            text=feedback["content"],
             keyboard=get_keyboard(const.USER_STATE_FEEDBACK_SELECTED),
         )
     # keyboard callback
@@ -462,11 +519,41 @@ def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, use
                 text=tt.DEFAULT_MESSAGE,
                 keyboard=get_keyboard(const.USER_STATE_MENU),
             )
-        # if action == const.USER_ACTION_FIRST_PAGE_FB:
-        # if action == const.USER_ACTION_PREV_PAGE_FB:
-        # if action == const.USER_ACTION_NEXT_PAGE_FB:
-        # if action == const.USER_ACTION_LAST_PAGE_FB:
         else:
+            show_page = user_state["params"]["page"]
+            if action == const.USER_ACTION_FIRST_PAGE_FB:
+                show_page = 0
+            elif action == const.USER_ACTION_PREV_PAGE_FB:
+                show_page = max(0, show_page - 1)
+            elif action == const.USER_ACTION_NEXT_PAGE_FB:
+                max_page = vk.get_feedbacks_pages_count(
+                    session=session,
+                    user_id=user_id,
+                )
+                show_page = min(max_page - 1, show_page + 1)
+            elif action == const.USER_ACTION_LAST_PAGE_FB:
+                max_page = vk.get_feedbacks_pages_count(
+                    session=session,
+                    user_id=user_id,
+                )
+                show_page = max_page - 1
+
+            message = vk.get_preview_feedbacks(
+                session=session,
+                user_id=user_id,
+                page_num=show_page,
+            )
+
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_PREVIEW_PAGE,
+                    "params": {
+                        "page": show_page,
+                    },
+                }
+            )
             vk.answer_event(
                 session=session,
                 vk_id=vk_id,
@@ -476,7 +563,7 @@ def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, use
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=tt.DEFAULT_MESSAGE,
+                text=message,
                 keyboard=get_keyboard(const.USER_STATE_PREVIEW_PAGE),
             )
 

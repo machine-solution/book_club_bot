@@ -47,3 +47,27 @@ CREATE_FEEDBACK = """
     SELECT %(user_id)s, id FROM created_feedback
     RETURNING feedback_id
 """
+
+
+GET_FEEDBACKS_FOR_USER = """
+    SELECT
+        feedbacks.content,
+        feedbacks.id
+    FROM book_club.feedbacks
+    JOIN book_club.users_feedbacks
+        ON (users_feedbacks.user_id = %(user_id)s
+            AND feedbacks.id = users_feedbacks.feedback_id)
+    ORDER BY created_at DESC
+    OFFSET %(start_num)s
+    LIMIT %(count)s
+"""
+
+
+GET_FEEDBACKS_COUNT_FOR_USER = """
+    SELECT
+        COUNT(*) as cnt
+    FROM book_club.feedbacks
+    JOIN book_club.users_feedbacks
+        ON (users_feedbacks.user_id = %(user_id)s
+            AND feedbacks.id = users_feedbacks.feedback_id)
+"""
