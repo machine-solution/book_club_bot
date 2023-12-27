@@ -31,7 +31,7 @@ BUTTON_COLOR_POSITIVE = "positive"
 BUTTON_COLOR_NEGATIVE = "negative"
 
 #================================================
-FEEDBACKS_PAGE_SIZE = 1
+FEEDBACKS_PAGE_SIZE = 10
 FEEDBACK_PREVIEW_LINE_SIZE = 45
 
 #================================================
