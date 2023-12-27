@@ -16,6 +16,28 @@ REPLY_WITH_NAME = """
 Надеюсь, что мы скоро подружимся! Хорошего дня :)
 """
 
+START_GREETING = """
+Привет! Я бот книжного клуба. Хочешь стать его частью? Тогда нажимай на кнопку ниже!
+"""
+
+DEFAULT_MESSAGE = """
+Сообщение-заглушка
+"""
+
+REGISTERED_ERLIER = """
+Вы уже были зарегистрированы ранее
+"""
+
+REGISTERED_T = """
+Вы зарегистрированы под id %s
+"""
+
+#=========================================================== button lables
+JOIN_CLUB_LABEL = "Вступить в клуб"
+ADD_FEEDBACK_LABEL = "Написать отзыв"
+VIEW_FEEDBACKS_LABEL = "Мои отзывы"
+
+#=========================================================== cron messages
 NOTIFY_NOW = """
 Саша @alwaysfeelsun, сегодня нужно сделать еженедельный пост в группе!
 """
@@ -27,16 +49,3 @@ NOTIFY_SOON = """
 TEST_MESSAGE = """
 Это тестовое сообщение. Привет тестировщикам!
 """
-
-#================================================
-USER_STATE_START = "start"
-USER_STATE_MENU = "menu"
-USER_STATE_WRITING_FEEDBACK = "writing_feedback"
-USER_STATE_PREVIEW_PAGE = "preview_page"
-USER_STATE_FEEDBACK_SELECTED = "feedback_selected"
-USER_STATE_EDITING_FEEDBACK = "editing_feedback"
-
-#================================================
-CLUB_CHAT_ID = 1
-TEST_CHAT_ID = 2
-ADMIN_CHAT_ID = 3

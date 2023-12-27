@@ -5,8 +5,8 @@ CONNECT_VK_USER = """
         ON CONFLICT DO NOTHING
         RETURNING user_id
     )
-    INSERT INTO book_club.users_states (user_id, state, state_params)
-    SELECT user_id, 'start'::TEXT, '{}'::TEXT FROM registered_user
+    INSERT INTO book_club.users_states (user_id, state, params)
+    SELECT user_id, 'menu'::TEXT, '{}'::TEXT FROM registered_user
     RETURNING user_id
 """
 
@@ -15,4 +15,24 @@ GET_USER_BY_VK = """
         user_id, vk_id, vk_tag
     FROM book_club.users
     WHERE vk_id = %(vk_id)s
+"""
+
+
+GET_USER_STATE = """
+    SELECT
+        state,
+        params
+    FROM book_club.users_states
+    WHERE user_id = %(user_id)s
+"""
+
+
+UPDATE_USER_STATE = """
+    UPDATE book_club.users_states
+    SET
+        state = %(state)s,
+        params = %(params)s
+    FROM book_club.users_states
+    WHERE user_id = %(user_id)s
+    RETURNING COUNT(*)
 """

@@ -1,9 +1,11 @@
 from dotenv import load_dotenv
+import json
 import os
 import vk_api
 from vk_api import utils as vk_utils
 
 import typing as tp
+from common import const
 from common import sql
 from common import sql_scripts
 
@@ -71,6 +73,43 @@ def get_vk_tag(session, vk_id) -> tp.Optional[str]:
     return users_data[0]["screen_name"]
 
 
+def get_user_state(session, user_id: tp.Optional[int]):
+    default_state = {
+        "state": const.USER_STATE_START,
+        "params": {},
+    }
+    if user_id is None:
+        return default_state
+
+    result = sql.fetch_one(
+        query=sql_scripts.GET_USER_STATE,
+        args={
+            "user_id": user_id,
+        }
+    )
+    if result is None:
+        return default_state
+    return {
+        "state": result["state"],
+        "params": json.loads(result["params"]),
+    }
+
+
+# new_state have to contain key 'state' with state and key 'params' with 
+# state params of type dict
+def update_user_state(session, user_id, new_state: tp.Dict) -> bool:
+    result = sql.fetch_one(
+        query=sql_scripts.UPDATE_USER_STATE,
+        args={
+            "user_id": user_id,
+            "state": new_state["state"],
+            "params": json.dumps(new_state["params"]),
+        }
+    )
+    # result["count"] == 1 means updated successfully
+    return result["count"] == 1
+
+
 def get_user_by_vk_id(session, vk_id) -> tp.Optional[tp.Dict]:
     result = sql.fetch_one(
         query=sql_scripts.GET_USER_BY_VK,
@@ -83,6 +122,7 @@ def get_user_by_vk_id(session, vk_id) -> tp.Optional[tp.Dict]:
     return result
 
 
+# register user and set state 'menu' into base
 def register_user(session, vk_id) -> tp.Optional[int]:
     vk_tag = get_vk_tag(
         session=session,
