@@ -107,7 +107,7 @@ def update_user_state(session, user_id, new_state: tp.Dict) -> bool:
         }
     )
     # result["count"] == 1 means updated successfully
-    return result["count"] == 1
+    return result["user_id"] == user_id
 
 
 def get_user_by_vk_id(session, vk_id) -> tp.Optional[tp.Dict]:

@@ -10,6 +10,13 @@ USER_STATE_EDITING_FEEDBACK = "editing_feedback"
 USER_ACTION_REGISTER = "register"
 USER_ACTION_ADD_FEEDBACK = "add_feedback"
 USER_ACTION_VIEW_FEEDBACKS = "view_feedbacks"
+USER_ACTION_BACK = "back"
+USER_ACTION_TO_MENU = "to_menu"
+USER_ACTION_FIRST_PAGE_FB = "first_page_fb"
+USER_ACTION_PREV_PAGE_FB = "prev_page_fb"
+USER_ACTION_NEXT_PAGE_FB = "next_page_fb"
+USER_ACTION_LAST_PAGE_FB = "last_page_fb"
+USER_ACTION_EDIT_FEEDBACK = "edit_feedback"
 
 #================================================
 PAYLOAD_TYPE_CUSTOM = "custom"

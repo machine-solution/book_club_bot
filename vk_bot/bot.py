@@ -40,7 +40,7 @@ def _empty_keyboard():
 
 def _start_state_keyboard():
     return {
-        "one_time": True,
+        "one_time": False,
         "buttons": [
             [
                 {
@@ -91,9 +91,167 @@ def _menu_state_keyboard():
     }
 
 
+def _writing_feedback_state_keyboard():
+    return {
+        "one_time": False,
+        "buttons": [
+            [
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_BACK,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.BACK_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_NEGATIVE,
+                },
+            ],
+        ]
+    }
+
+
+def _preview_page_state_keyboard():
+    return {
+        "one_time": False,
+        "buttons": [
+            [
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_FIRST_PAGE_FB,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.FIRST_PAGE_FB_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_SECONDARY,
+                },
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_PREV_PAGE_FB,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.PREV_PAGE_FB_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_SECONDARY,
+                },
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_NEXT_PAGE_FB,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.NEXT_PAGE_FB_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_SECONDARY,
+                },
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_LAST_PAGE_FB,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.LAST_PAGE_FB_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_SECONDARY,
+                },
+            ],
+            [
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_BACK,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.BACK_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_NEGATIVE,
+                },
+            ],
+        ]
+    }
+
+
+def _feedback_selected_state_keyboard():
+    return {
+        "one_time": False,
+        "buttons": [
+            [
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_EDIT_FEEDBACK,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.EDIT_FEEDBACK_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_SECONDARY,
+                },
+            ],
+            [
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_BACK,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.BACK_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_NEGATIVE,
+                },
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_TO_MENU,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.TO_MENU_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_NEGATIVE,
+                },
+            ],
+        ]
+    }
+
+
+def _editing_feedback_state_keyboard():
+    return {
+        "one_time": False,
+        "buttons": [
+            [
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_BACK,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.BACK_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_NEGATIVE,
+                },
+            ],
+        ]
+    }
+
+
 STATE_KEYBOARD_MAP = {
     const.USER_STATE_START: _start_state_keyboard(),
     const.USER_STATE_MENU: _menu_state_keyboard(),
+    const.USER_STATE_WRITING_FEEDBACK: _writing_feedback_state_keyboard(),
+    const.USER_STATE_PREVIEW_PAGE: _preview_page_state_keyboard(),
+    const.USER_STATE_FEEDBACK_SELECTED: _feedback_selected_state_keyboard(),
+    const.USER_STATE_EDITING_FEEDBACK: _editing_feedback_state_keyboard(),
 }
 
 
@@ -159,6 +317,85 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
         if payload.get("type", "") != "custom":
             return
         if payload.get("action", "") == const.USER_ACTION_ADD_FEEDBACK:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_WRITING_FEEDBACK,
+                    "params": {},
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.WRITE_YOUR_FEEDBACK,
+                keyboard=get_keyboard(const.USER_STATE_WRITING_FEEDBACK),
+            )
+        # TODO
+        if payload.get("action", "") == const.USER_ACTION_VIEW_FEEDBACKS:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_PREVIEW_PAGE,
+                    "params": {
+                        "page": 0,
+                    },
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.NAS_NO_FEEDBACKS,
+                keyboard=get_keyboard(const.USER_STATE_PREVIEW_PAGE),
+            )
+
+
+# USER_STATE_WRITING_FEEDBACK
+def _writing_feedback_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
+    # message from user
+    # TODO
+    if event.type == VkBotEventType.MESSAGE_NEW:
+        vk.update_user_state(
+            session=session,
+            user_id=user_id,
+            new_state={
+                "state": const.USER_STATE_MENU,
+                "params": {},
+            }
+        )
+        vk.send_message(
+            session=session,
+            vk_id=vk_id,
+            text=tt.FEEDBACK_REGISTERED,
+            keyboard=get_keyboard(const.USER_STATE_MENU),
+        )
+    # keyboard callback
+    elif event.type == VkBotEventType.MESSAGE_EVENT:
+        payload = event.obj.payload
+        if payload.get("type", "") != "custom":
+            return
+        if payload.get("action", "") == const.USER_ACTION_BACK:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_MENU,
+                    "params": {},
+                }
+            )
             vk.answer_event(
                 session=session,
                 vk_id=vk_id,
@@ -171,7 +408,210 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
                 text=tt.DEFAULT_MESSAGE,
                 keyboard=get_keyboard(const.USER_STATE_MENU),
             )
-        if payload.get("action", "") == const.USER_ACTION_VIEW_FEEDBACKS:
+
+
+# USER_STATE_PREVIEW_PAGE
+def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
+    # message from user
+    # TODO
+    if event.type == VkBotEventType.MESSAGE_NEW:
+        vk.update_user_state(
+            session=session,
+            user_id=user_id,
+            new_state={
+                "state": const.USER_STATE_FEEDBACK_SELECTED,
+                "params": {},
+            }
+        )
+        vk.send_message(
+            session=session,
+            vk_id=vk_id,
+            text=tt.DEFAULT_MESSAGE,
+            keyboard=get_keyboard(const.USER_STATE_FEEDBACK_SELECTED),
+        )
+    # keyboard callback
+    elif event.type == VkBotEventType.MESSAGE_EVENT:
+        payload = event.obj.payload
+        if payload.get("type", "") != "custom":
+            return
+        action = payload.get("action", "")
+        if action == const.USER_ACTION_BACK:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_MENU,
+                    "params": {},
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.DEFAULT_MESSAGE,
+                keyboard=get_keyboard(const.USER_STATE_MENU),
+            )
+        # if action == const.USER_ACTION_FIRST_PAGE_FB:
+        # if action == const.USER_ACTION_PREV_PAGE_FB:
+        # if action == const.USER_ACTION_NEXT_PAGE_FB:
+        # if action == const.USER_ACTION_LAST_PAGE_FB:
+        else:
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.DEFAULT_MESSAGE,
+                keyboard=get_keyboard(const.USER_STATE_PREVIEW_PAGE),
+            )
+
+
+# USER_STATE_FEEDBACK_SELECTED
+def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
+    # message from user
+    # TODO
+    if event.type == VkBotEventType.MESSAGE_NEW:
+        vk.send_message(
+            session=session,
+            vk_id=vk_id,
+            text=tt.DEFAULT_MESSAGE,
+            keyboard=get_keyboard(const.USER_STATE_FEEDBACK_SELECTED),
+        )
+    # keyboard callback
+    elif event.type == VkBotEventType.MESSAGE_EVENT:
+        payload = event.obj.payload
+        if payload.get("type", "") != "custom":
+            return
+        action = payload.get("action", "")
+        if action == const.USER_ACTION_BACK:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_PREVIEW_PAGE,
+                    "params": {},
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.DEFAULT_MESSAGE,
+                keyboard=get_keyboard(const.USER_STATE_PREVIEW_PAGE),
+            )
+        elif action == const.USER_ACTION_TO_MENU:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_MENU,
+                    "params": {},
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.DEFAULT_MESSAGE,
+                keyboard=get_keyboard(const.USER_STATE_MENU),
+            )
+        elif action == const.USER_ACTION_EDIT_FEEDBACK:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_EDITING_FEEDBACK,
+                    "params": {},
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.EDIT_FEEDBACK_HINT,
+                keyboard=get_keyboard(const.USER_STATE_EDITING_FEEDBACK),
+            )
+
+
+# USER_STATE_EDITING_FEEDBACK
+def _edeting_feedback_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
+    # message from user
+    # TODO
+    if event.type == VkBotEventType.MESSAGE_NEW:
+        vk.update_user_state(
+            session=session,
+            user_id=user_id,
+            new_state={
+                "state": const.USER_STATE_MENU,
+                "params": {},
+            }
+        )
+        vk.send_message(
+            session=session,
+            vk_id=vk_id,
+            text=tt.FEEDBACK_UPDATED,
+            keyboard=get_keyboard(const.USER_STATE_MENU),
+        )
+    # keyboard callback
+    elif event.type == VkBotEventType.MESSAGE_EVENT:
+        payload = event.obj.payload
+        if payload.get("type", "") != "custom":
+            return
+        action = payload.get("action", "")
+        if action == const.USER_ACTION_BACK:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_FEEDBACK_SELECTED,
+                    "params": {},
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.DEFAULT_MESSAGE,
+                keyboard=get_keyboard(const.USER_STATE_FEEDBACK_SELECTED),
+            )
+        elif action == const.USER_ACTION_TO_MENU:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_MENU,
+                    "params": {},
+                }
+            )
             vk.answer_event(
                 session=session,
                 vk_id=vk_id,
@@ -189,6 +629,10 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
 STATE_PROCESS_MAP = {
     const.USER_STATE_START: _start_process_vk,
     const.USER_STATE_MENU: _menu_process_vk,
+    const.USER_STATE_WRITING_FEEDBACK: _writing_feedback_process_vk,
+    const.USER_STATE_PREVIEW_PAGE: _preview_page_process_vk,
+    const.USER_STATE_FEEDBACK_SELECTED: _feedback_selected_process_vk,
+    const.USER_STATE_EDITING_FEEDBACK: _edeting_feedback_process_vk,
 }
 
 

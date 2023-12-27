@@ -32,7 +32,6 @@ UPDATE_USER_STATE = """
     SET
         state = %(state)s,
         params = %(params)s
-    FROM book_club.users_states
     WHERE user_id = %(user_id)s
-    RETURNING COUNT(*)
+    RETURNING user_id
 """
