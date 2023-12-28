@@ -1,8 +1,13 @@
 from dotenv import load_dotenv
 import json
 import os
+
+import requests
+from io import BytesIO
+
 import vk_api
 from vk_api import utils as vk_utils
+from vk_api.upload import VkUpload
 
 import typing as tp
 from common import const
@@ -26,13 +31,14 @@ def method(session, name, **kwargs):
     return session.method(name, kwargs)
 
 
-def send_message(session, vk_id, text, keyboard=None) -> tp.Optional[tp.Dict]:
+def send_message(session, vk_id, text, keyboard=None, attachment=None) -> tp.Optional[tp.Dict]:
     return method(
         session=session,
         name="messages.send",
         user_id=vk_id,
         message=text,
         keyboard=keyboard,
+        attachment=attachment,
     )
 
 
@@ -142,7 +148,7 @@ def register_user(session, vk_id) -> tp.Optional[int]:
     return result["user_id"]
 
 
-def create_feedback(session, user_id, feedback):
+def create_feedback(session, user_id, feedback, images=None):
     result = sql.fetch_one(
         query=sql_scripts.CREATE_FEEDBACK,
         args={
@@ -152,6 +158,12 @@ def create_feedback(session, user_id, feedback):
     )
     if result is None:
         return None
+    if images is not None:
+        update_attachments(
+            feedback_id=result["feedback_id"],
+            attachment_type=const.ATTCH_IMAGE,
+            urls=images,
+        )
     return result["feedback_id"]
 
 
@@ -178,7 +190,26 @@ def get_feedback_for_user(session, user_id, num: int):
     )
     if not feedbacks:
         return None
-    return feedbacks[0]
+    feedback = feedbacks[0]
+    raw_attachments = get_attachments(
+        feedback_id=feedback["id"],
+    )
+    image_urls = [
+        item["url"]
+        for item in raw_attachments
+        if item["type"] == const.BC_IMAGE_TYPE
+    ]
+    vk_attachments = [
+        _url_to_attachment(
+            session=session,
+            url=url,
+        )
+        for url in image_urls
+    ]
+    return {
+        "feedback": feedback,
+        "attachments": ",".join(vk_attachments),
+    }
 
 
 def get_feedbacks_count(session, user_id):
@@ -223,20 +254,65 @@ def get_preview_feedbacks(session, user_id, page_num):
     return answer
 
 
-def update_feedback(session, feedback_id, content):
-    result = sql.fetch_one(
+def update_feedback(session, feedback_id, content, images=None):
+    sql.fetch_one(
         query=sql_scripts.UPDATE_FEEDBACK,
         args={
             "feedback_id": feedback_id,
             "content": content,
         }
     )
+    update_attachments(
+        feedback_id=feedback_id,
+        attachment_type=const.ATTCH_IMAGE,
+        urls=images or [],
+    )
 
 
 def delete_feedback(session, feedback_id):
-    result = sql.fetch_one(
+    sql.fetch_one(
         query=sql_scripts.DELETE_FEEDBACK,
         args={
             "feedback_id": feedback_id,
         }
+    )
+
+
+def update_attachments(feedback_id, attachment_type, urls) -> bool:
+    result = sql.fetch_all(
+        query=sql_scripts.UPDATE_ATTACHMENTS,
+        args={
+            "feedback_id": feedback_id,
+            "type": attachment_type,
+            "urls": urls,
+        }
+    )
+    return len(result) == urls
+
+
+def get_attachments(feedback_id) -> tp.List:
+    result = sql.fetch_all(
+        query=sql_scripts.GET_ATTACHMENTS,
+        args={
+            "feedback_id": feedback_id,
+        }
+    )
+    return result
+
+
+def _url_to_attachment(session, url):
+    upload = VkUpload(session.get_api())
+    img = requests.get(url).content
+    f = BytesIO(img)
+
+    response = upload.photo_messages(f)[0]
+
+    owner_id = response['owner_id']
+    photo_id = response['id']
+    access_key = response['access_key']
+
+    return const.IMAGE_TEMPLATE_VK.format(
+        owner_id=owner_id,
+        photo_id=photo_id,
+        access_key=access_key,
     )

@@ -432,15 +432,35 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
             )
 
 
+def get_image_urls(event: EventType):
+    message = event.obj.message
+    attachments = message["attachments"]
+    urls = []
+    for attachment in attachments:
+        if attachment["type"] != const.VK_IMAGE_TYPE:
+            continue
+        photo = attachment["photo"]
+        sizes = photo["sizes"]
+        for item in sizes:
+            if item["type"] != const.X_TYPE:
+                continue
+            if len(urls) >= const.MAX_IMAGES_FB:
+                continue
+            urls.append(item["url"])
+    return urls
+
+
 # USER_STATE_WRITING_FEEDBACK
 def _writing_feedback_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
     # message from user
     if event.type == VkBotEventType.MESSAGE_NEW:
         feedback = event.obj.message["text"]
+        images = get_image_urls(event=event)
         vk.create_feedback(
             session=session,
             user_id=user_id,
             feedback=feedback,
+            images=images,
         )
         vk.update_user_state(
             session=session,
@@ -499,15 +519,15 @@ def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, use
         number = event.obj.message["text"]
         num = _convert_to_int(s=number)
 
-        feedback = None
+        feedback_obj = None
         if num is not None:
-            feedback = vk.get_feedback_for_user(
+            feedback_obj = vk.get_feedback_for_user(
                 session=session,
                 user_id=user_id,
                 num=num,
             )
         
-        if feedback is None:
+        if feedback_obj is None:
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
@@ -516,6 +536,8 @@ def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, use
             )
             return
         
+        feedback = feedback_obj["feedback"]
+        attachments = feedback_obj["attachments"]
 
         vk.update_user_state(
             session=session,
@@ -531,6 +553,7 @@ def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, use
             session=session,
             vk_id=vk_id,
             text=feedback["content"],
+            attachment=attachments,
             keyboard=get_keyboard(const.USER_STATE_FEEDBACK_SELECTED),
         )
     # keyboard callback
@@ -723,10 +746,12 @@ def _edeting_feedback_process_vk(session, event: EventType, user_state: tp.Dict,
     # message from user
     if event.type == VkBotEventType.MESSAGE_NEW:
         feedback = event.obj.message["text"]
+        images = get_image_urls(event=event)
         vk.update_feedback(
             session=session,
             feedback_id=user_state["params"]["feedback_id"],
             content=feedback,
+            images=images,
         )
         vk.update_user_state(
             session=session,
@@ -885,7 +910,16 @@ def process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optio
     )
 
 
+def _detect_message_not_ls(event: EventType):
+    if event.type == VkBotEventType.MESSAGE_NEW:
+        message = event.obj.message
+        return message["from_id"] != message["peer_id"]
+    return False
+
+
 for event in bot_longpoll.listen():
+    if _detect_message_not_ls(event):
+        continue
     vk_id = extract_vk_id(event)
     if vk_id is None:
         continue # user has not vk_id. I don't want to deal with him

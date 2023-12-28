@@ -38,6 +38,20 @@ FEEDBACKS_PAGE_SIZE = 10
 FEEDBACK_PREVIEW_LINE_SIZE = 45
 
 #================================================
+MAX_IMAGES_FB = 3
+
+#================================================
+ATTCH_IMAGE = "image"
+
+#================================================
+IMAGE_TEMPLATE_VK = "photo{owner_id}_{photo_id}_{access_key}"
+
+#================================================
+X_TYPE = "x"
+VK_IMAGE_TYPE = "photo"
+BC_IMAGE_TYPE = "image"
+
+#================================================
 CLUB_CHAT_ID = 1
 TEST_CHAT_ID = 2
 ADMIN_CHAT_ID = 3
