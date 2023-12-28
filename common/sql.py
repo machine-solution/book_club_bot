@@ -33,7 +33,8 @@ def fetch_one(query: str, args: tp.Dict):
     ) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cursor:
             cursor.execute(query=query, vars=args)
-            row = cursor.fetchone()
-            if row is None:
+            try:
+                row = cursor.fetchone()
+            except:
                 return None
             return dict(row)
