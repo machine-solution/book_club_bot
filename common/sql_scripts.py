@@ -85,3 +85,39 @@ DELETE_FEEDBACK = """
     DELETE FROM book_club.feedbacks
     WHERE id = %(feedback_id)s
 """
+
+
+ADD_ATTACHMENTS = """
+    INSERT INTO book_club.attachments (feedback_id, url, type)
+    SELECT (%(feedback_id)s, url, %(type)s)
+        FROM UNNEST(%(urls)s) as url
+    RETURNING id
+"""
+
+
+DROP_ATTACHMENTS = """
+    DELETE FROM book_club.attachments
+    WHERE feedback_id = %(feedback_id)s
+"""
+
+
+UPDATE_ATTACHMENTS = """
+    WITH delete_existing AS (
+        DELETE FROM book_club.attachments
+        WHERE feedback_id = %(feedback_id)s
+    )
+    INSERT INTO book_club.attachments (feedback_id, url, type)
+    SELECT %(feedback_id)s, url, %(type)s
+        FROM UNNEST(%(urls)s::TEXT[]) as url
+    RETURNING id
+"""
+
+
+GET_ATTACHMENTS = """
+    SELECT
+        url,
+        type
+    FROM book_club.attachments
+    WHERE feedback_id = %(feedback_id)s
+    ORDER BY id
+"""
