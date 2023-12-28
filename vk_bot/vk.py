@@ -221,3 +221,22 @@ def get_preview_feedbacks(session, user_id, page_num):
             content=feedback["content"],
         )
     return answer
+
+
+def update_feedback(session, feedback_id, content):
+    result = sql.fetch_one(
+        query=sql_scripts.UPDATE_FEEDBACK,
+        args={
+            "feedback_id": feedback_id,
+            "content": content,
+        }
+    )
+
+
+def delete_feedback(session, feedback_id, content):
+    result = sql.fetch_one(
+        query=sql_scripts.DELETE_FEEDBACK,
+        args={
+            "feedback_id": feedback_id,
+        }
+    )

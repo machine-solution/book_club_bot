@@ -71,3 +71,17 @@ GET_FEEDBACKS_COUNT_FOR_USER = """
         ON (users_feedbacks.user_id = %(user_id)s
             AND feedbacks.id = users_feedbacks.feedback_id)
 """
+
+
+UPDATE_FEEDBACK = """
+    UPDATE book_club.feedbacks
+    SET
+        content = %(content)s
+    WHERE id = %(feedback_id)s
+"""
+
+
+DELETE_FEEDBACK = """
+    DELETE FROM book_club.feedbacks
+    WHERE id = %(feedback_id)s
+"""

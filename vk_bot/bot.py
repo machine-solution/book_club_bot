@@ -195,6 +195,17 @@ def _feedback_selected_state_keyboard():
                     },
                     "color": const.BUTTON_COLOR_SECONDARY,
                 },
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_DELETE_FEEDBACK,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.DELETE_FEEDBACK_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_SECONDARY,
+                },
             ],
             [
                 {
@@ -344,14 +355,6 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
                 page_num=0,
             )
             if not message:
-                vk.update_user_state(
-                    session=session,
-                    user_id=user_id,
-                    new_state={
-                        "state": const.USER_STATE_MENU,
-                        "params": {},
-                    }
-                )
                 vk.answer_event(
                     session=session,
                     vk_id=vk_id,
@@ -453,7 +456,6 @@ def _convert_to_int(s) -> tp.Optional[int]:
 # USER_STATE_PREVIEW_PAGE
 def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
     # message from user
-    # TODO
     if event.type == VkBotEventType.MESSAGE_NEW:
         number = event.obj.message["text"]
         num = _convert_to_int(s=number)
@@ -591,7 +593,9 @@ def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict
                 user_id=user_id,
                 new_state={
                     "state": const.USER_STATE_PREVIEW_PAGE,
-                    "params": {},
+                    "params": {
+                        "page": 0,
+                    },
                 }
             )
             vk.answer_event(
@@ -633,7 +637,9 @@ def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict
                 user_id=user_id,
                 new_state={
                     "state": const.USER_STATE_EDITING_FEEDBACK,
-                    "params": {},
+                    "params": {
+                        "feedback_id": user_state["params"]["feedback_id"],
+                    },
                 }
             )
             vk.answer_event(
@@ -653,8 +659,13 @@ def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict
 # USER_STATE_EDITING_FEEDBACK
 def _edeting_feedback_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
     # message from user
-    # TODO
     if event.type == VkBotEventType.MESSAGE_NEW:
+        feedback = event.obj.message["text"]
+        vk.update_feedback(
+            session=session,
+            feedback_id=user_state["params"]["feedback_id"],
+            content=feedback,
+        )
         vk.update_user_state(
             session=session,
             user_id=user_id,
@@ -681,7 +692,9 @@ def _edeting_feedback_process_vk(session, event: EventType, user_state: tp.Dict,
                 user_id=user_id,
                 new_state={
                     "state": const.USER_STATE_FEEDBACK_SELECTED,
-                    "params": {},
+                    "params": {
+                        "feedback_id": user_state["params"]["feedback_id"],
+                    },
                 }
             )
             vk.answer_event(
