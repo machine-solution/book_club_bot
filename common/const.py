@@ -5,7 +5,7 @@ USER_STATE_WRITING_FEEDBACK = "writing_feedback"
 USER_STATE_PREVIEW_PAGE = "preview_page"
 USER_STATE_FEEDBACK_SELECTED = "feedback_selected"
 USER_STATE_EDITING_FEEDBACK = "editing_feedback"
-USER_STATE_DELETING_FEEDBACK = "editing_feedback"
+USER_STATE_DELETING_FEEDBACK = "deleting_feedback"
 
 #================================================
 USER_ACTION_REGISTER = "register"

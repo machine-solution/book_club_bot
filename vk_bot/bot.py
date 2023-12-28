@@ -330,7 +330,7 @@ def _start_process_vk(session, event: EventType, user_state: tp.Dict, user_id: t
             if user_id is None:
                 message = tt.REGISTERED_ERLIER
             else:
-                message = tt.REGISTERED_T % user_id
+                message = tt.REGISTERED
             vk.answer_event(
                 session=session,
                 vk_id=vk_id,
@@ -352,7 +352,7 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
         vk.send_message(
             session=session,
             vk_id=vk_id,
-            text=tt.DEFAULT_MESSAGE,
+            text=tt.USE_BUTTONS,
             keyboard=get_keyboard(const.USER_STATE_MENU),
         )
     # keyboard callback
@@ -421,6 +421,12 @@ def _menu_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
+                text=tt.SELECT_FB_HINT,
+                keyboard=get_keyboard(const.USER_STATE_PREVIEW_PAGE),
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
                 text=message,
                 keyboard=get_keyboard(const.USER_STATE_PREVIEW_PAGE),
             )
@@ -473,7 +479,7 @@ def _writing_feedback_process_vk(session, event: EventType, user_state: tp.Dict,
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=tt.DEFAULT_MESSAGE,
+                text=tt.RETURN_BACK_EXPLAIN,
                 keyboard=get_keyboard(const.USER_STATE_MENU),
             )
 
@@ -551,7 +557,7 @@ def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, use
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=tt.DEFAULT_MESSAGE,
+                text=tt.RETURN_BACK_EXPLAIN,
                 keyboard=get_keyboard(const.USER_STATE_MENU),
             )
         else:
@@ -606,12 +612,11 @@ def _preview_page_process_vk(session, event: EventType, user_state: tp.Dict, use
 # USER_STATE_FEEDBACK_SELECTED
 def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
     # message from user
-    # TODO
     if event.type == VkBotEventType.MESSAGE_NEW:
         vk.send_message(
             session=session,
             vk_id=vk_id,
-            text=tt.DEFAULT_MESSAGE,
+            text=tt.USE_BUTTONS,
             keyboard=get_keyboard(const.USER_STATE_FEEDBACK_SELECTED),
         )
     # keyboard callback
@@ -640,7 +645,7 @@ def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=tt.DEFAULT_MESSAGE,
+                text=tt.RETURN_BACK_EXPLAIN,
                 keyboard=get_keyboard(const.USER_STATE_PREVIEW_PAGE),
             )
         elif action == const.USER_ACTION_TO_MENU:
@@ -661,7 +666,7 @@ def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=tt.DEFAULT_MESSAGE,
+                text=tt.RETURN_MENU_EXPLAIN,
                 keyboard=get_keyboard(const.USER_STATE_MENU),
             )
         elif action == const.USER_ACTION_EDIT_FEEDBACK:
@@ -681,6 +686,7 @@ def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict
                 peer_id=event.obj.peer_id,
                 event_id=event.obj.event_id,
             )
+            print(get_keyboard(const.USER_STATE_EDITING_FEEDBACK))
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
@@ -762,7 +768,7 @@ def _edeting_feedback_process_vk(session, event: EventType, user_state: tp.Dict,
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=tt.DEFAULT_MESSAGE,
+                text=tt.RETURN_BACK_EXPLAIN,
                 keyboard=get_keyboard(const.USER_STATE_FEEDBACK_SELECTED),
             )
         elif action == const.USER_ACTION_TO_MENU:
@@ -783,7 +789,7 @@ def _edeting_feedback_process_vk(session, event: EventType, user_state: tp.Dict,
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=tt.DEFAULT_MESSAGE,
+                text=tt.RETURN_MENU_EXPLAIN,
                 keyboard=get_keyboard(const.USER_STATE_MENU),
             )
 
@@ -795,7 +801,7 @@ def _deleting_feedback_process_vk(session, event: EventType, user_state: tp.Dict
         vk.send_message(
             session=session,
             vk_id=vk_id,
-            text=tt.DELETE_CONFIRMATION,
+            text=tt.USE_BUTTONS,
             keyboard=get_keyboard(const.USER_STATE_DELETING_FEEDBACK),
         )
     # keyboard callback
@@ -824,7 +830,7 @@ def _deleting_feedback_process_vk(session, event: EventType, user_state: tp.Dict
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
-                text=tt.DEFAULT_MESSAGE,
+                text=tt.RETURN_BACK_EXPLAIN,
                 keyboard=get_keyboard(const.USER_STATE_FEEDBACK_SELECTED),
             )
         elif action == const.USER_ACTION_CONFIRM_DELETE_FB:
