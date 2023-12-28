@@ -256,6 +256,38 @@ def _editing_feedback_state_keyboard():
     }
 
 
+def _deleting_feedback_state_keyboard():
+    return {
+        "one_time": False,
+        "buttons": [
+            [
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_CONFIRM_DELETE_FB,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.YES_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_POSITIVE,
+                },
+                {
+                    "action": {
+                        "type": const.BUTTON_TYPE_CALLBACK,
+                        "payload": json.dumps({
+                            "action": const.USER_ACTION_BACK,
+                            "type": const.PAYLOAD_TYPE_CUSTOM,
+                        }),
+                        "label": tt.NO_LABEL,
+                    },
+                    "color": const.BUTTON_COLOR_NEGATIVE,
+                },
+            ],
+        ]
+    }
+
+
 STATE_KEYBOARD_MAP = {
     const.USER_STATE_START: _start_state_keyboard(),
     const.USER_STATE_MENU: _menu_state_keyboard(),
@@ -263,6 +295,7 @@ STATE_KEYBOARD_MAP = {
     const.USER_STATE_PREVIEW_PAGE: _preview_page_state_keyboard(),
     const.USER_STATE_FEEDBACK_SELECTED: _feedback_selected_state_keyboard(),
     const.USER_STATE_EDITING_FEEDBACK: _editing_feedback_state_keyboard(),
+    const.USER_STATE_DELETING_FEEDBACK: _deleting_feedback_state_keyboard(),
 }
 
 
@@ -654,6 +687,29 @@ def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict
                 text=tt.EDIT_FEEDBACK_HINT,
                 keyboard=get_keyboard(const.USER_STATE_EDITING_FEEDBACK),
             )
+        elif action == const.USER_ACTION_DELETE_FEEDBACK:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_DELETING_FEEDBACK,
+                    "params": {
+                        "feedback_id": user_state["params"]["feedback_id"],
+                    },
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.DELETE_CONFIRMATION,
+                keyboard=get_keyboard(const.USER_STATE_DELETING_FEEDBACK),
+            )
 
 
 # USER_STATE_EDITING_FEEDBACK
@@ -732,6 +788,72 @@ def _edeting_feedback_process_vk(session, event: EventType, user_state: tp.Dict,
             )
 
 
+# USER_STATE_DELETING_FEEDBACK
+def _deleting_feedback_process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optional[int], vk_id: int):
+    # message from user
+    if event.type == VkBotEventType.MESSAGE_NEW:
+        vk.send_message(
+            session=session,
+            vk_id=vk_id,
+            text=tt.DELETE_CONFIRMATION,
+            keyboard=get_keyboard(const.USER_STATE_DELETING_FEEDBACK),
+        )
+    # keyboard callback
+    elif event.type == VkBotEventType.MESSAGE_EVENT:
+        payload = event.obj.payload
+        if payload.get("type", "") != "custom":
+            return
+        action = payload.get("action", "")
+        if action == const.USER_ACTION_BACK:
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_FEEDBACK_SELECTED,
+                    "params": {
+                        "feedback_id": user_state["params"]["feedback_id"],
+                    },
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.DEFAULT_MESSAGE,
+                keyboard=get_keyboard(const.USER_STATE_FEEDBACK_SELECTED),
+            )
+        elif action == const.USER_ACTION_CONFIRM_DELETE_FB:
+            vk.delete_feedback(
+                session=session,
+                feedback_id=user_state["params"]["feedback_id"],
+            )
+            vk.update_user_state(
+                session=session,
+                user_id=user_id,
+                new_state={
+                    "state": const.USER_STATE_MENU,
+                    "params": {},
+                }
+            )
+            vk.answer_event(
+                session=session,
+                vk_id=vk_id,
+                peer_id=event.obj.peer_id,
+                event_id=event.obj.event_id,
+            )
+            vk.send_message(
+                session=session,
+                vk_id=vk_id,
+                text=tt.FB_DELETED,
+                keyboard=get_keyboard(const.USER_STATE_MENU),
+            )
+
+
 STATE_PROCESS_MAP = {
     const.USER_STATE_START: _start_process_vk,
     const.USER_STATE_MENU: _menu_process_vk,
@@ -739,6 +861,7 @@ STATE_PROCESS_MAP = {
     const.USER_STATE_PREVIEW_PAGE: _preview_page_process_vk,
     const.USER_STATE_FEEDBACK_SELECTED: _feedback_selected_process_vk,
     const.USER_STATE_EDITING_FEEDBACK: _edeting_feedback_process_vk,
+    const.USER_STATE_DELETING_FEEDBACK: _deleting_feedback_process_vk,
 }
 
 

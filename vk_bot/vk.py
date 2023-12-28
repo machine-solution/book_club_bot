@@ -233,7 +233,7 @@ def update_feedback(session, feedback_id, content):
     )
 
 
-def delete_feedback(session, feedback_id, content):
+def delete_feedback(session, feedback_id):
     result = sql.fetch_one(
         query=sql_scripts.DELETE_FEEDBACK,
         args={
