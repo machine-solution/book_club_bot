@@ -885,7 +885,17 @@ def process_vk(session, event: EventType, user_state: tp.Dict, user_id: tp.Optio
     )
 
 
+def _detect_message_not_ls(event: EventType):
+    if event.type == VkBotEventType.MESSAGE_NEW:
+        message = event.obj.message
+        return message["from_id"] != message["peer_id"]
+    return False
+
+
 for event in bot_longpoll.listen():
+    if _detect_message_not_ls(event):
+        continue
+    print(event.obj)
     vk_id = extract_vk_id(event)
     if vk_id is None:
         continue # user has not vk_id. I don't want to deal with him
