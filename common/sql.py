@@ -35,6 +35,6 @@ def fetch_one(query: str, args: tp.Dict):
             cursor.execute(query=query, vars=args)
             try:
                 row = cursor.fetchone()
+                return dict(row)
             except:
                 return None
-            return dict(row)

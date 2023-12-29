@@ -709,7 +709,6 @@ def _feedback_selected_process_vk(session, event: EventType, user_state: tp.Dict
                 peer_id=event.obj.peer_id,
                 event_id=event.obj.event_id,
             )
-            print(get_keyboard(const.USER_STATE_EDITING_FEEDBACK))
             vk.send_message(
                 session=session,
                 vk_id=vk_id,
