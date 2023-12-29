@@ -17,6 +17,13 @@ GET_USER_BY_VK = """
     WHERE vk_id = %(vk_id)s
 """
 
+GET_USER = """
+    SELECT
+        user_id, vk_id, vk_tag
+    FROM book_club.users
+    WHERE user_id = %(user_id)s
+"""
+
 
 GET_USER_STATE = """
     SELECT
@@ -120,4 +127,34 @@ GET_ATTACHMENTS = """
     FROM book_club.attachments
     WHERE feedback_id = %(feedback_id)s
     ORDER BY id
+"""
+
+
+GET_FEEDBACK_BY_ID = """
+    SELECT
+        f.content,
+        f.id,
+        uf.user_id
+    FROM book_club.feedbacks f
+    JOIN book_club.users_feedbacks uf
+        ON (f.id = uf.feedback_id)
+    WHERE f.id = %(feedback_id)s
+"""
+
+
+GET_FEEDBACKS_TO_POST = """
+    SELECT
+        feedbacks.id
+    FROM book_club.feedbacks
+    WHERE not is_posted
+    ORDER BY created_at ASC
+    LIMIT %(count)s
+"""
+
+
+MARK_FB_POSTED = """
+    UPDATE book_club.feedbacks
+    SET is_posted = TRUE
+    WHERE id = %(feedback_id)s
+    RETURNING id
 """
