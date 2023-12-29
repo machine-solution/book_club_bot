@@ -15,11 +15,17 @@ from common import sql
 from common import sql_scripts
 
 load_dotenv()
-TOKEN = os.environ["VK_TOKEN"]
+VK_TOKEN = os.environ["VK_TOKEN"]
+VK_USER_TOKEN = os.environ["VK_USER_TOKEN"]
+VK_PEER_ID = -int(os.environ["VK_GROUP_ID"])
 
 
 def get_session():
-    return vk_api.VkApi(token = TOKEN)
+    return vk_api.VkApi(token = VK_TOKEN)
+
+
+def get_user_session():
+    return vk_api.VkApi(token = VK_USER_TOKEN)
 
 
 def get_api():
@@ -39,6 +45,18 @@ def send_message(session, vk_id, text, keyboard=None, attachment=None) -> tp.Opt
         message=text,
         keyboard=keyboard,
         attachment=attachment,
+    )
+
+
+def create_post(user_session, text, attachment=None, publish_date=None) -> tp.Optional[tp.Dict]:
+    return method(
+        session=user_session,
+        name="wall.post",
+        owner_id=VK_PEER_ID,
+        from_group=1,
+        message=text,
+        attachment=attachment,
+        publish_date=publish_date,
     )
 
 
@@ -123,8 +141,16 @@ def get_user_by_vk_id(session, vk_id) -> tp.Optional[tp.Dict]:
             "vk_id": vk_id,
         }
     )
-    if result is None:
-        return None
+    return result
+
+
+def get_user_by_id(session, user_id) -> tp.Optional[tp.Dict]:
+    result = sql.fetch_one(
+        query=sql_scripts.GET_USER,
+        args={
+            "user_id": user_id,
+        }
+    )
     return result
 
 
@@ -181,6 +207,22 @@ def get_feedbacks_for_user(session, user_id, start_num: int, count: int):
     return result
 
 
+def _prepare_attachments(session, raw_attachments: tp.List):
+    image_urls = [
+        item["url"]
+        for item in raw_attachments
+        if item["type"] == const.BC_IMAGE_TYPE
+    ]
+    vk_attachments = [
+        _url_to_attachment(
+            session=session,
+            url=url,
+        )
+        for url in image_urls
+    ]
+    return ",".join(vk_attachments)
+
+
 def get_feedback_for_user(session, user_id, num: int):
     feedbacks = get_feedbacks_for_user(
         session=session,
@@ -194,21 +236,29 @@ def get_feedback_for_user(session, user_id, num: int):
     raw_attachments = get_attachments(
         feedback_id=feedback["id"],
     )
-    image_urls = [
-        item["url"]
-        for item in raw_attachments
-        if item["type"] == const.BC_IMAGE_TYPE
-    ]
-    vk_attachments = [
-        _url_to_attachment(
-            session=session,
-            url=url,
-        )
-        for url in image_urls
-    ]
+    attachments = _prepare_attachments(session=session, raw_attachments=raw_attachments)
     return {
         "feedback": feedback,
-        "attachments": ",".join(vk_attachments),
+        "attachments": attachments,
+    }
+
+
+def get_feedback_by_id(session, feedback_id: int):
+    feedback = sql.fetch_one(
+        query=sql_scripts.GET_FEEDBACK_BY_ID,
+        args={
+            "feedback_id": feedback_id,
+        }
+    )
+    if not feedback:
+        return None
+    raw_attachments = get_attachments(
+        feedback_id=feedback["id"],
+    )
+    attachments = _prepare_attachments(session=session, raw_attachments=raw_attachments)
+    return {
+        "feedback": feedback,
+        "attachments": attachments,
     }
 
 
@@ -316,3 +366,25 @@ def _url_to_attachment(session, url):
         photo_id=photo_id,
         access_key=access_key,
     )
+
+
+# returns not more than count not posted feedbacks
+# ids in order from latest
+def get_feedbacks_to_post(count: int) -> tp.List:
+    feedbacks = sql.fetch_all(
+        query=sql_scripts.GET_FEEDBACKS_TO_POST,
+        args={
+            "count": count,
+        }
+    )
+    return [fb["id"] for fb in feedbacks]
+
+
+def mark_fb_posted(feedback_id: int) -> bool:
+    result = sql.fetch_one(
+        query=sql_scripts.MARK_FB_POSTED,
+        args={
+            "feedback_id": feedback_id,
+        }
+    )
+    return result is not None

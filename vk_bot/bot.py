@@ -15,7 +15,7 @@ EventType = tp.Union[bot_longpoll.VkBotEvent, bot_longpoll.VkBotMessageEvent]
 
 
 load_dotenv()
-VK_GROUP_ID = os.environ["VK_GROUP_ID"]
+VK_GROUP_ID = int(os.environ["VK_GROUP_ID"])
 
 session = vk.get_session()
 bot_longpoll = VkBotLongPoll(session, VK_GROUP_ID)
@@ -917,25 +917,28 @@ def _detect_message_not_ls(event: EventType):
 
 
 for event in bot_longpoll.listen():
-    if _detect_message_not_ls(event):
-        continue
-    vk_id = extract_vk_id(event)
-    if vk_id is None:
-        continue # user has not vk_id. I don't want to deal with him
-    user = vk.get_user_by_vk_id(
-        session=session,
-        vk_id=vk_id,
-    )
-    user_id = user["user_id"] if user is not None else None
-    user_state = vk.get_user_state(
-        session=session,
-        user_id=user_id,
-    )
+    try: # if error not fail
+        if _detect_message_not_ls(event):
+            continue
+        vk_id = extract_vk_id(event)
+        if vk_id is None:
+            continue # user has not vk_id. I don't want to deal with him
+        user = vk.get_user_by_vk_id(
+            session=session,
+            vk_id=vk_id,
+        )
+        user_id = user["user_id"] if user is not None else None
+        user_state = vk.get_user_state(
+            session=session,
+            user_id=user_id,
+        )
 
-    process_vk(
-        session=session,
-        event=event,
-        user_state=user_state,
-        user_id=user_id,
-        vk_id=vk_id,
-    )
+        process_vk(
+            session=session,
+            event=event,
+            user_state=user_state,
+            user_id=user_id,
+            vk_id=vk_id,
+        )
+    except:
+        pass
