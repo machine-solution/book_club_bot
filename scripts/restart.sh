@@ -2,8 +2,7 @@
 
 cd /home/machine_solution/book_club/book_club_bot
 
-scripts/kill.sh
 scripts/update.sh
-scripts/run.sh
+scripts/kill.sh # service will be restarted automaticly by systemctl
 
 cd -

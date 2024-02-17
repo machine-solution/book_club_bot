@@ -364,7 +364,6 @@ def _url_to_attachment(session, url):
     return const.IMAGE_TEMPLATE_VK.format(
         owner_id=owner_id,
         photo_id=photo_id,
-        access_key=access_key,
     )
 
 

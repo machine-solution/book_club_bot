@@ -20,6 +20,8 @@ code=$?
 
 if [[ $code == 0 ]]; then
     echo "$(date +%F::%T) Success release" >> /home/machine_solution/logs/shell.log
+    scripts/kill.sh >> /home/machine_solution/logs/shell.log
+    # service will be restarted automaticly by systemctl
 else
     echo "$(date +%F::%T) Fail release" >> /home/machine_solution/logs/shell.log
 fi
