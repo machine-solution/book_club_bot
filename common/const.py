@@ -44,7 +44,7 @@ MAX_IMAGES_FB = 3
 ATTCH_IMAGE = "image"
 
 #================================================
-IMAGE_TEMPLATE_VK = "photo{owner_id}_{photo_id}_{access_key}"
+IMAGE_TEMPLATE_VK = "photo{owner_id}_{photo_id}"
 
 #================================================
 X_TYPE = "x"
